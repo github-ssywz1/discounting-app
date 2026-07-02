@@ -1,31 +1,50 @@
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useEffect } from 'react'
 import { Save, Check } from 'lucide-react'
-import {
-  CATEGORY_LIST,
-  getSubcategories,
-} from '../data/categories'
-import { addExpense } from '../data/db'
+import { addExpense, getTopLevelCategories, getSubcategoryNames } from '../data/db'
+import type { Category } from '../types'
 
 interface Props {
   onSuccess: () => void
 }
 
 export default function AddExpense({ onSuccess }: Props) {
+  const [topCategories, setTopCategories] = useState<Category[]>([])
+  const [subcategoryNames, setSubcategoryNames] = useState<string[]>([])
+  const [category, setCategory] = useState('')
+  const [subcategory, setSubcategory] = useState('')
   const [amount, setAmount] = useState('')
-  const [category, setCategory] = useState(CATEGORY_LIST[0])
-  const [subcategory, setSubcategory] = useState(getSubcategories(CATEGORY_LIST[0])[0])
   const [date, setDate] = useState(new Date().toISOString().slice(0, 10))
   const [note, setNote] = useState('')
   const [saving, setSaving] = useState(false)
   const [showSuccess, setShowSuccess] = useState(false)
 
-  const subcategories = getSubcategories(category)
+  // 页面加载时从数据库读取分类
+  useEffect(() => {
+    const loadCategories = async () => {
+      const topList = await getTopLevelCategories()
+      setTopCategories(topList)
+      if (topList.length > 0) {
+        setCategory(topList[0].name)
+        const subNames = await getSubcategoryNames(topList[0].name)
+        setSubcategoryNames(subNames)
+        if (subNames.length > 0) {
+          setSubcategory(subNames[0])
+        }
+      }
+    }
+    loadCategories()
+  }, [])
 
-  // 切换一级分类时，二级分类重置为第一个
-  const handleCategoryChange = useCallback((newCategory: string) => {
+  // 切换一级分类时，加载对应的二级分类
+  const handleCategoryChange = useCallback(async (newCategory: string) => {
     setCategory(newCategory)
-    const subs = getSubcategories(newCategory)
-    setSubcategory(subs[0])
+    const subNames = await getSubcategoryNames(newCategory)
+    setSubcategoryNames(subNames)
+    if (subNames.length > 0) {
+      setSubcategory(subNames[0])
+    } else {
+      setSubcategory('')
+    }
   }, [])
 
   const handleSubmit = async () => {
@@ -100,9 +119,9 @@ export default function AddExpense({ onSuccess }: Props) {
               text-slate-700 cursor-pointer transition-all appearance-none
               bg-[url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2216%22%20height%3D%2216%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%2394a3b8%22%20stroke-width%3D%222%22%3E%3Cpath%20d%3D%22m6%209%206%206%206-6%22%2F%3E%3C%2Fsvg%3E')] bg-no-repeat bg-[right_0.75rem_center] pr-10"
           >
-            {CATEGORY_LIST.map((cat) => (
-              <option key={cat} value={cat}>
-                {cat}
+            {topCategories.map((cat) => (
+              <option key={cat.id} value={cat.name}>
+                {cat.name}
               </option>
             ))}
           </select>
@@ -117,7 +136,7 @@ export default function AddExpense({ onSuccess }: Props) {
               text-slate-700 cursor-pointer transition-all appearance-none
               bg-[url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2216%22%20height%3D%2216%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%2394a3b8%22%20stroke-width%3D%222%22%3E%3Cpath%20d%3D%22m6%209%206%206%206-6%22%2F%3E%3C%2Fsvg%3E')] bg-no-repeat bg-[right_0.75rem_center] pr-10"
           >
-            {subcategories.map((sub) => (
+            {subcategoryNames.map((sub) => (
               <option key={sub} value={sub}>
                 {sub}
               </option>

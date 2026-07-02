@@ -1,8 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Trash2, Filter, X } from 'lucide-react'
-import { getExpenses, deleteExpense } from '../data/db'
-import { CATEGORY_LIST } from '../data/categories'
-import type { Expense } from '../types'
+import { getExpenses, deleteExpense, getTopLevelCategories } from '../data/db'
+import type { Expense, Category } from '../types'
 import { format } from 'date-fns'
 
 export default function ExpenseList() {
@@ -10,6 +9,7 @@ export default function ExpenseList() {
   const [filterCategory, setFilterCategory] = useState('')
   const [filterMonth, setFilterMonth] = useState('')
   const [loading, setLoading] = useState(true)
+  const [categoryList, setCategoryList] = useState<Category[]>([])
 
   // 加载数据
   const loadExpenses = async () => {
@@ -35,6 +35,11 @@ export default function ExpenseList() {
   useEffect(() => {
     loadExpenses()
   }, [filterCategory, filterMonth])
+
+  // 加载分类列表（用于筛选下拉）
+  useEffect(() => {
+    getTopLevelCategories().then(setCategoryList)
+  }, [])
 
   const handleDelete = async (id: number) => {
     await deleteExpense(id)
@@ -95,9 +100,9 @@ export default function ExpenseList() {
             bg-[url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2216%22%20height%3D%2216%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%2394a3b8%22%20stroke-width%3D%222%22%3E%3Cpath%20d%3D%22m6%209%206%206%206-6%22%2F%3E%3C%2Fsvg%3E')] bg-no-repeat bg-[right_0.5rem_center] pr-8"
         >
           <option value="">全部分类</option>
-          {CATEGORY_LIST.map((cat) => (
-            <option key={cat} value={cat}>
-              {cat}
+          {categoryList.map((cat) => (
+            <option key={cat.id} value={cat.name}>
+              {cat.name}
             </option>
           ))}
         </select>

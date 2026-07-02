@@ -21,3 +21,10 @@ export const CATEGORY_LIST = Object.keys(CATEGORY_MAP);
 export function getSubcategories(category: string): string[] {
   return CATEGORY_MAP[category] || [];
 }
+
+/** 预置分类种子数据（供数据库初始化使用） */
+export const PRESET_CATEGORIES: { name: string; subcategories: string[] }[] =
+  CATEGORY_LIST.map((name) => ({
+    name,
+    subcategories: CATEGORY_MAP[name],
+  }));

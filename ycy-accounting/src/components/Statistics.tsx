@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react'
-import { getCategoryStats, getMonthlyTotal } from '../data/db'
-import { CATEGORY_LIST } from '../data/categories'
+import { getCategoryStats, getMonthlyTotal, getTopLevelCategories } from '../data/db'
 import { format } from 'date-fns'
 
 interface CategoryStat {
@@ -15,6 +14,12 @@ export default function Statistics() {
   const [stats, setStats] = useState<CategoryStat[]>([])
   const [monthlyTotal, setMonthlyTotal] = useState(0)
   const [loading, setLoading] = useState(true)
+  const [categoryCount, setCategoryCount] = useState(0)
+
+  // 加载分类总数
+  useEffect(() => {
+    getTopLevelCategories().then((list) => setCategoryCount(list.length))
+  }, [])
 
   useEffect(() => {
     const loadStats = async () => {
@@ -133,7 +138,7 @@ export default function Statistics() {
           </div>
 
           {/* 未使用的分类提示 */}
-          {stats.length < CATEGORY_LIST.length && (
+          {stats.length < categoryCount && (
             <p className="text-xs text-slate-300 text-center mt-3">
               * 仅显示该月有支出的分类
             </p>
