@@ -45,6 +45,7 @@ cd android && ./gradlew assembleDebug
 
 | 标签 | 说明 |
 |------|------|
+| v1.2 | 添加 README.md，项目文档完善 |
 | v1.1 | 新增分类管理：用户可增删改自定义分类 |
 | v1.0 | 初版完成：记账 + 明细 + 统计，PWA + APK 支持 |
 
