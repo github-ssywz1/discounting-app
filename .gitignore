@@ -1,0 +1,23 @@
+# 依赖包（网上随时能下载，不需要备份）
+node_modules/
+
+# 构建产物（自动生成的，不需要备份）
+dist/
+android/app/build/
+android/build/
+android/.gradle/
+android/capacitor-cordova-android-plugins/build/
+android/capacitor-android/build/
+
+# 临时文件和缓存
+*.log
+*.tmp
+.DS_Store
+Thumbs.db
+
+# 环境配置（每台电脑不同，不需要共享）
+.env
+.env.local
+
+# APK 安装包（可以随时重新构建）
+*.apk
