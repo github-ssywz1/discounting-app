@@ -1,17 +1,19 @@
 import { useState } from 'react'
-import { PencilLine, List, PieChart, Tags } from 'lucide-react'
+import { PencilLine, List, PieChart, Tags, Gamepad2 } from 'lucide-react'
 import AddExpense from './components/AddExpense'
 import ExpenseList from './components/ExpenseList'
 import Statistics from './components/Statistics'
 import CategoryManager from './components/CategoryManager'
+import SnakeGame from './components/SnakeGame'
 
-type Tab = '记账' | '明细' | '统计' | '分类'
+type Tab = '记账' | '明细' | '统计' | '分类' | '游戏'
 
 const TABS: { key: Tab; label: string; icon: React.ReactNode }[] = [
   { key: '记账', label: '记账', icon: <PencilLine size={18} /> },
   { key: '明细', label: '明细', icon: <List size={18} /> },
   { key: '统计', label: '统计', icon: <PieChart size={18} /> },
   { key: '分类', label: '分类', icon: <Tags size={18} /> },
+  { key: '游戏', label: '游戏', icon: <Gamepad2 size={18} /> },
 ]
 
 export default function App() {
@@ -67,6 +69,9 @@ export default function App() {
         )}
         {activeTab === '分类' && (
           <CategoryManager />
+        )}
+        {activeTab === '游戏' && (
+          <SnakeGame />
         )}
       </main>
     </div>
