@@ -1,3 +1,11 @@
+/**
+ * ycy记账 — 主应用组件
+ *
+ * 负责整个应用的布局和标签页切换：
+ * 1. 顶部标题栏（"ycy记账"）
+ * 2. 5 个标签页：记账、明细、统计、分类、游戏
+ * 3. 记账成功后自动刷新明细和统计页面
+ */
 import { useState } from 'react'
 import { PencilLine, List, PieChart, Tags, Gamepad2 } from 'lucide-react'
 import AddExpense from './components/AddExpense'
@@ -6,8 +14,10 @@ import Statistics from './components/Statistics'
 import CategoryManager from './components/CategoryManager'
 import SnakeGame from './components/SnakeGame'
 
+/** 5 个标签页的类型 */
 type Tab = '记账' | '明细' | '统计' | '分类' | '游戏'
 
+/** 标签页配置列表（名称 + 图标） */
 const TABS: { key: Tab; label: string; icon: React.ReactNode }[] = [
   { key: '记账', label: '记账', icon: <PencilLine size={18} /> },
   { key: '明细', label: '明细', icon: <List size={18} /> },
@@ -16,15 +26,16 @@ const TABS: { key: Tab; label: string; icon: React.ReactNode }[] = [
   { key: '游戏', label: '游戏', icon: <Gamepad2 size={18} /> },
 ]
 
+/** App 根组件：顶部标题栏 + 标签切换 + 内容区 */
 export default function App() {
+  // 当前选中的标签页，默认显示"记账"
   const [activeTab, setActiveTab] = useState<Tab>('记账')
-  // 用于刷新列表的关键计数器
+  // 刷新计数器：数字变化时，子组件会重新加载数据
   const [refreshKey, setRefreshKey] = useState(0)
 
-  // 记账成功后触发刷新
+  /** 记账成功后：刷新列表 + 自动跳转到明细页查看 */
   const handleExpenseAdded = () => {
     setRefreshKey((k) => k + 1)
-    // 自动跳转到明细页查看
     setActiveTab('明细')
   }
 

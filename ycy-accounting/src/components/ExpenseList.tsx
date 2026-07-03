@@ -1,9 +1,19 @@
-import { useState, useEffect } from 'react'
+/**
+ * ExpenseList — 明细页面组件
+ *
+ * 按日期分组展示所有记账记录，支持：
+ * 1. 按月份筛选（最近 12 个月可选）
+ * 2. 按一级分类筛选
+ * 3. 显示筛选期间的总笔数和总金额
+ * 4. 删除单笔记账记录
+ */
+import { useState, useEffect, useCallback } from 'react'
 import { Trash2, Filter, X } from 'lucide-react'
 import { getExpenses, deleteExpense, getTopLevelCategories } from '../data/db'
 import type { Expense, Category } from '../types'
 import { format } from 'date-fns'
 
+/** 明细页面：筛选栏 + 汇总条 + 按日期分组的记账列表 */
 export default function ExpenseList() {
   const [expenses, setExpenses] = useState<Expense[]>([])
   const [filterCategory, setFilterCategory] = useState('')
@@ -11,38 +21,49 @@ export default function ExpenseList() {
   const [loading, setLoading] = useState(true)
   const [categoryList, setCategoryList] = useState<Category[]>([])
 
-  // 加载数据
-  const loadExpenses = async () => {
+  /** 从数据库加载记账列表（根据筛选条件过滤） */
+  const loadExpenses = useCallback(async () => {
     setLoading(true)
-    const filter: { startDate?: string; endDate?: string; category?: string } = {}
+    try {
+      const filter: { startDate?: string; endDate?: string; category?: string } = {}
 
-    if (filterMonth) {
-      filter.startDate = `${filterMonth}-01`
-      // 计算该月最后一天
-      const [year, month] = filterMonth.split('-')
-      const lastDay = new Date(parseInt(year), parseInt(month), 0).getDate()
-      filter.endDate = `${filterMonth}-${String(lastDay).padStart(2, '0')}`
-    }
-    if (filterCategory) {
-      filter.category = filterCategory
-    }
+      if (filterMonth) {
+        filter.startDate = `${filterMonth}-01`
+        // 计算选中月份的最后一天
+        const [year, month] = filterMonth.split('-')
+        const lastDay = new Date(parseInt(year), parseInt(month), 0).getDate()
+        filter.endDate = `${filterMonth}-${String(lastDay).padStart(2, '0')}`
+      }
+      if (filterCategory) {
+        filter.category = filterCategory
+      }
 
-    const data = await getExpenses(filter)
-    setExpenses(data)
-    setLoading(false)
-  }
+      const data = await getExpenses(filter)
+      setExpenses(data)
+    } catch {
+      // 数据库读取失败，保持空列表
+      setExpenses([])
+    } finally {
+      setLoading(false)
+    }
+  }, [filterCategory, filterMonth])
 
   useEffect(() => {
     loadExpenses()
-  }, [filterCategory, filterMonth])
+  }, [loadExpenses])
 
   // 加载分类列表（用于筛选下拉）
   useEffect(() => {
     getTopLevelCategories().then(setCategoryList)
   }, [])
 
+  /** 删除一笔记账记录后重新加载列表 */
   const handleDelete = async (id: number) => {
-    await deleteExpense(id)
+    try {
+      await deleteExpense(id)
+    } catch {
+      // 删除失败（如数据库异常），静默处理
+    }
     loadExpenses()
   }
 

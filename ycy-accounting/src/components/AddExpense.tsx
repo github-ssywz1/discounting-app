@@ -1,12 +1,23 @@
+/**
+ * AddExpense — 记账页面组件
+ *
+ * 用户在这里录入一笔花销，包括：
+ * 1. 金额（元，最多两位小数）
+ * 2. 一级分类 + 二级分类
+ * 3. 日期（默认今天）和备注（可选）
+ * 4. 保存到本地数据库，通知父组件刷新
+ */
 import { useState, useCallback, useEffect } from 'react'
 import { Save, Check } from 'lucide-react'
 import { addExpense, getTopLevelCategories, getSubcategoryNames } from '../data/db'
 import type { Category } from '../types'
 
+/** 组件接收的参数：保存成功后的回调 */
 interface Props {
   onSuccess: () => void
 }
 
+/** 记账页面：金额输入 + 分类选择 + 日期 + 备注 + 提交 */
 export default function AddExpense({ onSuccess }: Props) {
   const [topCategories, setTopCategories] = useState<Category[]>([])
   const [subcategoryNames, setSubcategoryNames] = useState<string[]>([])
@@ -18,18 +29,22 @@ export default function AddExpense({ onSuccess }: Props) {
   const [saving, setSaving] = useState(false)
   const [showSuccess, setShowSuccess] = useState(false)
 
-  // 页面加载时从数据库读取分类
+  // 页面加载时从数据库读取分类列表
   useEffect(() => {
     const loadCategories = async () => {
-      const topList = await getTopLevelCategories()
-      setTopCategories(topList)
-      if (topList.length > 0) {
-        setCategory(topList[0].name)
-        const subNames = await getSubcategoryNames(topList[0].name)
-        setSubcategoryNames(subNames)
-        if (subNames.length > 0) {
-          setSubcategory(subNames[0])
+      try {
+        const topList = await getTopLevelCategories()
+        setTopCategories(topList)
+        if (topList.length > 0) {
+          setCategory(topList[0].name)
+          const subNames = await getSubcategoryNames(topList[0].name)
+          setSubcategoryNames(subNames)
+          if (subNames.length > 0) {
+            setSubcategory(subNames[0])
+          }
         }
+      } catch {
+        // 数据库读取失败（如首次加载或存储异常），静默处理
       }
     }
     loadCategories()
@@ -47,30 +62,36 @@ export default function AddExpense({ onSuccess }: Props) {
     }
   }, [])
 
+  /** 提交记账：验证金额 → 保存到数据库 → 重置表单 → 通知父组件 */
   const handleSubmit = async () => {
     const amountNum = parseFloat(amount)
     if (!amount || isNaN(amountNum) || amountNum <= 0) return
 
     setSaving(true)
-    await addExpense({
-      amount: amountNum,
-      category,
-      subcategory,
-      note: note.trim(),
-      date,
-    })
+    try {
+      await addExpense({
+        amount: amountNum,
+        category,
+        subcategory,
+        note: note.trim(),
+        date,
+      })
 
-    // 重置表单
-    setAmount('')
-    setNote('')
-    setDate(new Date().toISOString().slice(0, 10))
-    setSaving(false)
+      // 重置表单
+      setAmount('')
+      setNote('')
+      setDate(new Date().toISOString().slice(0, 10))
 
-    // 显示成功反馈
-    setShowSuccess(true)
-    setTimeout(() => setShowSuccess(false), 1500)
+      // 显示成功反馈
+      setShowSuccess(true)
+      setTimeout(() => setShowSuccess(false), 1500)
 
-    onSuccess()
+      onSuccess()
+    } catch {
+      // 保存失败（如存储空间满），静默处理
+    } finally {
+      setSaving(false)
+    }
   }
 
   // 回车键提交

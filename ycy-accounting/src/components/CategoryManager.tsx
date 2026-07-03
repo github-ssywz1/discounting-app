@@ -1,3 +1,12 @@
+/**
+ * CategoryManager — 分类管理页面组件
+ *
+ * 用户可以在这里管理花销分类：
+ * 1. 查看所有一级/二级分类（预置分类带锁图标，不可修改）
+ * 2. 新建一级分类或二级分类
+ * 3. 重命名用户自建分类（同步更新已有记账记录）
+ * 4. 删除用户自建分类（无记账记录时才能删除）
+ */
 import { useState, useEffect } from 'react'
 import { Plus, Pencil, Trash2, Lock, ChevronDown, ChevronRight, X } from 'lucide-react'
 import {
@@ -9,9 +18,10 @@ import {
 } from '../data/db'
 import type { Category } from '../types'
 
-/** 弹窗类型 */
+/** 弹窗类型：不显示/新建一级/新建二级/编辑 */
 type ModalType = 'none' | 'addTop' | 'addSub' | 'edit'
 
+/** 分类管理页面：查看、新建、重命名、删除分类 */
 export default function CategoryManager() {
   // 一级分类列表
   const [topCategories, setTopCategories] = useState<Category[]>([])
@@ -133,7 +143,7 @@ export default function CategoryManager() {
       }
       closeModal()
       await loadData()
-    } catch (e) {
+    } catch {
       setModalError('操作失败，请重试')
     }
     setSaving(false)

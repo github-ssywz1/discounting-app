@@ -1,7 +1,15 @@
+/**
+ * SnakeGame — 贪吃蛇小游戏组件
+ *
+ * 一个在 Canvas 上运行的经典贪吃蛇游戏：
+ * - 20x20 网格，方向键/WASD 控制
+ * - 手机端支持滑动和屏幕按钮
+ * - 最高分记录保存在浏览器本地
+ */
 import { useRef, useEffect, useState, useCallback } from 'react'
 import { Play, RotateCcw } from 'lucide-react'
 
-// 游戏配置
+// ═══ 游戏配置 ═══
 const GRID = 20           // 20×20 网格
 const CELL = 20           // 每格像素
 const SPEED = 120         // 移动间隔（毫秒），越小越快

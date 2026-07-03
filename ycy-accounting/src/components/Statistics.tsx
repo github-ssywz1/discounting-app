@@ -1,12 +1,22 @@
+/**
+ * Statistics — 统计页面组件
+ *
+ * 展示某个月份的支出统计，包括：
+ * 1. 月度总支出金额
+ * 2. 各分类的支出排行（带比例条）
+ * 3. 可通过下拉选择不同月份
+ */
 import { useState, useEffect } from 'react'
 import { getCategoryStats, getMonthlyTotal, getTopLevelCategories } from '../data/db'
 import { format } from 'date-fns'
 
+/** 分类统计数据：名称 + 金额 */
 interface CategoryStat {
   category: string
   total: number
 }
 
+/** 统计页面：月份选择 + 月度总额 + 分类排行 + 比例条 */
 export default function Statistics() {
   const [selectedMonth, setSelectedMonth] = useState(
     format(new Date(), 'yyyy-MM')
@@ -24,13 +34,20 @@ export default function Statistics() {
   useEffect(() => {
     const loadStats = async () => {
       setLoading(true)
-      const [categoryStats, total] = await Promise.all([
-        getCategoryStats(selectedMonth),
-        getMonthlyTotal(selectedMonth),
-      ])
-      setStats(categoryStats)
-      setMonthlyTotal(total)
-      setLoading(false)
+      try {
+        const [categoryStats, total] = await Promise.all([
+          getCategoryStats(selectedMonth),
+          getMonthlyTotal(selectedMonth),
+        ])
+        setStats(categoryStats)
+        setMonthlyTotal(total)
+      } catch {
+        // 数据库读取失败，显示空数据
+        setStats([])
+        setMonthlyTotal(0)
+      } finally {
+        setLoading(false)
+      }
     }
     loadStats()
   }, [selectedMonth])
