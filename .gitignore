@@ -21,3 +21,7 @@ Thumbs.db
 
 # APK 安装包（可以随时重新构建）
 *.apk
+
+# 门禁标记文件（运行时自动生成，不需要备份）
+.claude/.test-result
+.claude/.quality-result

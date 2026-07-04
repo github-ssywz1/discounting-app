@@ -108,3 +108,17 @@ skills:
 - 所有输出使用中文
 - 如果某个技能执行失败（如超时），继续执行后续维度，不要中断
 - 汇总报告必须清晰、完整
+
+## 标记文件
+
+质量检查全部完成后，必须在项目 `.claude/` 目录下写入标记文件，供 git commit hook 验证：
+
+```bash
+# 零严重问题（🔴 = 0），通过
+echo "PASS" > d:/claudecode/vibecoding/记账app/.claude/.quality-result
+
+# 存在严重问题，不通过
+echo "FAIL" > d:/claudecode/vibecoding/记账app/.claude/.quality-result
+```
+
+标记文件内容只允许 `PASS` 或 `FAIL`，不包含其他文字。这一步是强制性的，无论结果如何都要写入。

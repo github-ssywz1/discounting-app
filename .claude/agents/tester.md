@@ -48,3 +48,17 @@ skills:
 - 所有输出使用中文
 - 测试文件放在被测文件旁边（`xxx.test.ts`）
 - 不要修改源码，除非用户明确要求
+
+## 标记文件
+
+测试完成后，必须在项目 `.claude/` 目录下写入标记文件，供 git commit hook 验证：
+
+```bash
+# 全部测试通过
+echo "PASS" > d:/claudecode/vibecoding/记账app/.claude/.test-result
+
+# 有测试失败
+echo "FAIL" > d:/claudecode/vibecoding/记账app/.claude/.test-result
+```
+
+标记文件内容只允许 `PASS` 或 `FAIL`，不包含其他文字。这一步是强制性的，无论测试结果如何都要写入。
